@@ -32,7 +32,7 @@ import placeholderImage from "@/assets/no-image.png";
 interface IGalleryItem {
   url: string;
   label: string;
-  isBrokenUrl: boolean;
+  isBrokenUrl?: boolean;
 }
 
 export default defineComponent({
@@ -42,13 +42,25 @@ export default defineComponent({
     onMounted(loadImages);
 
     async function loadImages<Promise>() {
-      const galleryItemsFetched = await fetch(
-        "https://s3.eu-west-2.amazonaws.com/assets-test.fast-thinking.co.uk/recruitment/data.json"
-      );
+      let response;
 
-      galleryItems.value = await galleryItemsFetched.json();
+      try {
+        response = await fetch(
+          "https://s3.eu-west-2.amazonaws.com/assets-test.fast-thinking.co.uk/recruitment/data.json"
+        );
+      } catch (e) {
+        console.error(e);
+      }
 
-      galleryItems.value = galleryItems.value.map(
+      let _galleryItems = [];
+
+      if (response?.ok) {
+        _galleryItems = await response.json();
+      } else {
+        console.log(`HTTP Response Code: ${response?.status}`);
+      }
+
+      galleryItems.value = _galleryItems.map(
         (item: IGalleryItem): IGalleryItem => ({
           ...item,
           isBrokenUrl: false,
