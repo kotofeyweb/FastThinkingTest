@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TheGallery from "./components/TheGallery/index.vue";
+import TheGallery from "./components/TheGallery.vue";
 </script>
 
 <template>
