@@ -12,9 +12,10 @@
     >
       <gallery-item
         class="single-image images-list__single-image"
-        v-for="image in galleryItemsList"
-        :key="image.url + image.label"
+        v-for="(image, index) in galleryItemsList"
+        :key="index"
         :data="image"
+        :index="index"
         @img-load-error="handleBrokenImgUrl"
       />
     </ul>
@@ -78,14 +79,9 @@ export default defineComponent({
       );
     }
 
-    function handleBrokenImgUrl(brokenItem: IGalleryItem) {
-      let brokenItemIndex = galleryItemsList.value.findIndex(
-        (item: IGalleryItem) =>
-          item.url === brokenItem.url && item.label === item.label
-      );
-
-      galleryItemsList.value[brokenItemIndex] = {
-        ...galleryItemsList.value[brokenItemIndex],
+    function handleBrokenImgUrl(index: number) {
+      galleryItemsList.value[index] = {
+        ...galleryItemsList.value[index],
         isBrokenUrl: true,
       };
     }

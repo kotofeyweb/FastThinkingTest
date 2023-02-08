@@ -26,13 +26,14 @@ import placeholderImage from "@/assets/no-image.png";
 export default defineComponent({
   props: {
     data: { type: Object as PropType<IGalleryItem> },
+    index: { type: Number as PropType<number> },
   },
 
   emits: ["img-load-error"],
 
   setup(props, { emit }) {
     function handleBrokenImgUrl() {
-      emit("img-load-error", props.data);
+      emit("img-load-error", props.index);
     }
 
     return {
