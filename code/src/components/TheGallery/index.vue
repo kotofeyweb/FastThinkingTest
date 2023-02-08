@@ -13,9 +13,8 @@
       <gallery-item
         class="single-image images-list__single-image"
         v-for="(image, index) in galleryItemsList"
-        :key="index"
+        :key="image.id"
         :data="image"
-        :index="index"
         @img-load-error="handleBrokenImgUrl"
       />
     </ul>
@@ -31,6 +30,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch } from "vue";
+import { v4 as uuidv4 } from "uuid";
 
 import type { IGalleryItem } from "@/models/gallery.models";
 
@@ -51,7 +51,7 @@ export default defineComponent({
 
     let isDataLoaded = ref<boolean>(false);
 
-    async function loadImages<Promise>() {
+    async function loadImages<Promise>(isOnlyUpdateBroken: boolean = false) {
       let response;
 
       try {
@@ -71,17 +71,37 @@ export default defineComponent({
         console.log(`HTTP Response Code: ${response?.status}`);
       }
 
-      galleryItemsList.value = _galleryItemsList.map(
-        (item: IGalleryItem): IGalleryItem => ({
-          ...item,
-          isBrokenUrl: false,
-        })
-      );
+      if (isOnlyUpdateBroken) {
+        const indexesOfBrokenImages: Array<number> =
+          galleryItemsList.value.reduce<Array<number>>(
+            (acc, item, index) => (!item.isBrokenUrl ? [...acc, index] : acc),
+            []
+          );
+
+        indexesOfBrokenImages.forEach((i) => {
+          galleryItemsList.value[i] = {
+            ...galleryItemsList.value[i],
+            isBrokenUrl: false,
+          };
+        });
+      } else {
+        galleryItemsList.value = _galleryItemsList.map(
+          (item: IGalleryItem): IGalleryItem => ({
+            ...item,
+            id: uuidv4(),
+            isBrokenUrl: false,
+          })
+        );
+      }
     }
 
-    function handleBrokenImgUrl(index: number) {
-      galleryItemsList.value[index] = {
-        ...galleryItemsList.value[index],
+    function handleBrokenImgUrl(id: string) {
+      const brokenUrlItemIndex: number = galleryItemsList.value.findIndex(
+        (item) => item.id === id
+      );
+
+      galleryItemsList.value[brokenUrlItemIndex] = {
+        ...galleryItemsList.value[brokenUrlItemIndex],
         isBrokenUrl: true,
       };
     }
@@ -106,7 +126,7 @@ export default defineComponent({
         return;
       }
       reloadingTryCount += 1;
-      loadImages();
+      loadImages(true);
     }
 
     watch(galleryItemsList, tryToLoadImagesAgainDebounced(), {
