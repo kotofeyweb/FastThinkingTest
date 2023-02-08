@@ -73,11 +73,12 @@ export default defineComponent({
     const tryToLoadImagesAgainDebounced = () => {
       let timer: ReturnType<typeof setTimeout>;
 
-      return (...args: []): void => {
+      return (): void => {
         clearTimeout(timer);
-        timer = setTimeout(() => {
-          tryToLoadImagesAgain.apply(this, args);
-        }, Math.pow(2, reloadingTryCount + 1) * 1000);
+        timer = setTimeout(
+          tryToLoadImagesAgain,
+          Math.pow(2, reloadingTryCount + 1) * 1000
+        );
       };
     };
 
