@@ -9,10 +9,11 @@ import TheGallery from "./components/TheGallery/index.vue";
   </main>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 body {
   font: 12px/16px serif;
   color: #000;
+  overflow-y: scroll;
 }
 
 main {

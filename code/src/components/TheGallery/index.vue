@@ -1,14 +1,30 @@
 <template>
   <div class="images-list">
-    <ul class="images-list__list-itself">
+    <ul v-if="!isDataLoaded" class="images-list__list-itself">
+      <gallery-item-skeleton
+        class="single-image images-list__single-image"
+        v-for="(_, index) in Array(16)"
+      />
+    </ul>
+    <ul
+      v-else-if="isDataLoaded && galleryItemsList.length"
+      class="images-list__list-itself"
+    >
       <gallery-item
         class="single-image images-list__single-image"
-        v-for="image in galleryItems"
+        v-for="image in galleryItemsList"
         :key="image.url + image.label"
         :data="image"
         @img-load-error="handleBrokenImgUrl"
       />
     </ul>
+
+    <div
+      v-else-if="isDataLoaded && !galleryItemsList.length"
+      class="images-list__no-images-message"
+    >
+      There is no images to show
+    </div>
   </div>
 </template>
 
@@ -19,16 +35,20 @@ import type { IGalleryItem } from "@/models/gallery.models";
 
 // Components
 import GalleryItem from "./gallery-item.vue";
+import GalleryItemSkeleton from "./gallery-item-skeleton.vue";
 
 export default defineComponent({
   components: {
     GalleryItem,
+    GalleryItemSkeleton,
   },
 
   setup() {
-    let galleryItems = ref<IGalleryItem[]>([]);
+    let galleryItemsList = ref<IGalleryItem[]>([]);
 
     onMounted(loadImages);
+
+    let isDataLoaded = ref<boolean>(false);
 
     async function loadImages<Promise>() {
       let response;
@@ -37,19 +57,20 @@ export default defineComponent({
         response = await fetch(
           "https://s3.eu-west-2.amazonaws.com/assets-test.fast-thinking.co.uk/recruitment/data.json"
         );
+        isDataLoaded.value = true;
       } catch (e) {
         console.error(e);
       }
 
-      let _galleryItems = [];
+      let _galleryItemsList = [];
 
       if (response?.ok) {
-        _galleryItems = await response.json();
+        _galleryItemsList = await response.json();
       } else {
         console.log(`HTTP Response Code: ${response?.status}`);
       }
 
-      galleryItems.value = _galleryItems.map(
+      galleryItemsList.value = _galleryItemsList.map(
         (item: IGalleryItem): IGalleryItem => ({
           ...item,
           isBrokenUrl: false,
@@ -58,13 +79,13 @@ export default defineComponent({
     }
 
     function handleBrokenImgUrl(brokenItem: IGalleryItem) {
-      let brokenItemIndex = galleryItems.value.findIndex(
+      let brokenItemIndex = galleryItemsList.value.findIndex(
         (item: IGalleryItem) =>
           item.url === brokenItem.url && item.label === item.label
       );
 
-      galleryItems.value[brokenItemIndex] = {
-        ...galleryItems.value[brokenItemIndex],
+      galleryItemsList.value[brokenItemIndex] = {
+        ...galleryItemsList.value[brokenItemIndex],
         isBrokenUrl: true,
       };
     }
@@ -92,12 +113,13 @@ export default defineComponent({
       loadImages();
     }
 
-    watch(galleryItems, tryToLoadImagesAgainDebounced(), {
+    watch(galleryItemsList, tryToLoadImagesAgainDebounced(), {
       deep: true,
     });
 
     return {
-      galleryItems,
+      galleryItemsList,
+      isDataLoaded,
       handleBrokenImgUrl,
     };
   },
@@ -122,6 +144,10 @@ export default defineComponent({
 
   &__single-image {
     margin: 6px;
+  }
+
+  &__no-images-message {
+    color: gray;
   }
 }
 </style>

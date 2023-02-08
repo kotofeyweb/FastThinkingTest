@@ -1,15 +1,15 @@
 ﻿<template>
-  <li class="single-image">
-    <div class="single-image__img-wrap">
+  <li class="gallery-item">
+    <div class="gallery-item__img-wrap">
       <img
-        class="single-image__img"
+        class="gallery-item__img"
         :src="props.data.isBrokenUrl ? placeholderImage : props.data.url"
         :alt="props.data.label"
         :onerror="handleBrokenImgUrl"
       />
     </div>
 
-    <div class="single-image__label">
+    <div class="gallery-item__label">
       {{ props.data.label }}
     </div>
   </li>
@@ -45,8 +45,8 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-// Single image ===============================================================
-.single-image {
+// Gallery item ===============================================================
+.gallery-item {
   width: 160px;
 
   &__img-wrap {
@@ -69,6 +69,7 @@ export default defineComponent({
 
   &__label {
     width: 100%;
+    height: 15px;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
