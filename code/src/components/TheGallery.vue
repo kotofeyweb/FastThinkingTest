@@ -83,11 +83,11 @@ export default defineComponent({
     const reloadingTryCountLimit = 9;
 
     const tryToLoadImagesAgainDebounced = () => {
-      let timer: ReturnType<typeof setTimeout>;
+      let timeoutReference: ReturnType<typeof setTimeout>;
 
       return (): void => {
-        clearTimeout(timer);
-        timer = setTimeout(
+        clearTimeout(timeoutReference);
+        timeoutReference = setTimeout(
           tryToLoadImagesAgain,
           Math.pow(2, reloadingTryCount + 1) * 1000
         );
